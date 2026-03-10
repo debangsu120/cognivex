@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>AI Interview Onboarding</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#e2e8f0",
+                        "background-light": "#f8f7f5",
+                        "background-dark": "#0a0a0a",
+                        "card-dark": "#1a1a1a",
+                    },
+                    fontFamily: {
+                        "display": ["Inter"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.5rem",
+                        "lg": "1rem",
+                        "xl": "1.5rem",
+                        "2xl": "2rem",
+                        "full": "9999px"
+                    },
+                    boxShadow: {
+                        'soft': '0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.3)',
+                        'neumorphic': '6px 6px 12px #050505, -6px -6px 12px #151515',
+                    }
+                },
+            },
+        }</script>
+<style>
+        body {
+            background: linear-gradient(180deg, #121212 0%, #000000 100%);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 min-h-screen flex flex-col items-center justify-center p-6">
+<div class="max-w-[440px] w-full flex flex-col h-full space-y-8">
+<!-- Header / Hero Illustration Section -->
+<div class="w-full @container">
+<div class="relative w-full aspect-[4/5] rounded-xl overflow-hidden shadow-soft bg-card-dark flex items-center justify-center border border-white/5">
+<div class="absolute inset-0 bg-cover bg-center opacity-90" data-alt="Futuristic minimalist AI interviewer avatar, sleek 3D render" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAXngUOXUWVp0uMCXlcp7UPQ2JqI3S2xCb6vLgFOXWCyMq2y-9PjIXQxgZ6v5NyISjuWA7esZR_61meiALNV7XB6UWdxVV-g2aGdEcWXezAWRlGcKGa1alnLz-YyCc0RlbA-f9i1-CEj7gnTuvOjA4r6dnHDdUQrNt3YyEVUa48OUr0xnmRiAD2OQSrK-HbKOaJDrz9NCIZVJ14bLkPEZO2j0L14GowXsNv1ISkE7BhuUDLlYDo3eSQsVG4lVkJ5MvFDEgW-C7eg-U')">
+</div>
+<!-- Soft Glow Overlay -->
+<div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+</div>
+</div>
+<!-- Text Content Section -->
+<div class="flex flex-col space-y-4 px-2">
+<h1 class="text-white text-4xl font-bold leading-tight tracking-tight">
+                AI Interviews <br/>Made Simple
+            </h1>
+<p class="text-slate-400 text-lg font-light leading-relaxed max-w-[320px]">
+                Get matched with companies and complete AI-powered interviews anytime.
+            </p>
+</div>
+<!-- Action Buttons Section -->
+<div class="flex items-center gap-4 pt-4">
+<!-- Icon Button -->
+<button class="flex items-center justify-center w-16 h-16 shrink-0 rounded-xl bg-primary shadow-lg text-background-dark hover:opacity-90 transition-all">
+<span class="material-symbols-outlined text-3xl font-bold">arrow_forward</span>
+</button>
+<!-- Main CTA Button -->
+<button class="flex-1 h-16 rounded-xl border border-white/10 flex items-center justify-center shadow-neumorphic hover:bg-white/5 transition-all bg-slate-200">
+<span class="text-xl font-semibold tracking-wide text-background-dark">Get Started</span>
+</button>
+</div>
+<!-- Footer Pagination Dots (Aesthetic consistent with shipping apps) -->
+<div class="flex justify-start gap-2 px-2 pt-4">
+<div class="h-1.5 w-8 rounded-full bg-primary"></div>
+<div class="h-1.5 w-2 rounded-full bg-slate-800"></div>
+<div class="h-1.5 w-2 rounded-full bg-slate-800"></div>
+</div>
+</div>
+</body></html>
