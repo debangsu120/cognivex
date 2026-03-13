@@ -11,44 +11,154 @@ class GroqService:
     def __init__(self):
         self.client = AsyncGroq(api_key=settings.groq_api_key)
 
-    async def extract_skills_from_resume(self, resume_text: str) -> List[str]:
-        """Extract skills from resume text using AI."""
-        prompt = f"""Analyze the following resume text and extract all technical skills, soft skills, and professional competencies.
-Return only a JSON array of skill names, nothing else.
+    async def extract_resume_details(self, resume_text: str) -> Dict:
+        """Extract detailed information from resume using AI.
+
+        Args:
+            resume_text: Raw resume text content
+
+        Returns:
+            Dictionary containing:
+                - skills: List of extracted skills
+                - years_of_experience: Estimated years of experience
+                - education: Education details
+                - technologies: List of technologies/tools
+        """
+        prompt = f"""Analyze the following resume and extract:
+1. skills: ["Python", "JavaScript", ...] - technical and soft skills
+2. years_of_experience: number - estimated total years
+3. education: "B.Tech in Computer Science" - education details
+4. technologies: ["AWS", "Docker", "React", ...] - specific technologies/tools
 
 Resume text:
 {resume_text}
 
-Return a JSON array like: ["Python", "JavaScript", "Project Management", "AWS"]"""
+Return JSON only with this exact format:
+{{
+    "skills": [],
+    "years_of_experience": 0,
+    "education": "",
+    "technologies": []
+}}
+
+Return ONLY valid JSON, no other text."""
 
         try:
             response = await self.client.chat.completions.create(
                 model="llama-3.3-70b-versatile",
                 messages=[
-                    {"role": "system", "content": "You are a resume parser. Extract skills from resumes. Return only valid JSON."},
+                    {"role": "system", "content": "You are a resume parser. Extract detailed information from resumes. Return only valid JSON."},
                     {"role": "user", "content": prompt}
                 ],
                 temperature=0.1,
-                max_tokens=1000
+                max_tokens=1500
             )
 
             content = response.choices[0].message.content
-            # Try to parse JSON from the response
             try:
-                skills = json.loads(content)
-                if isinstance(skills, list):
-                    return skills
+                details = json.loads(content)
+                return {
+                    "skills": details.get("skills", []),
+                    "years_of_experience": details.get("years_of_experience", 0),
+                    "education": details.get("education", ""),
+                    "technologies": details.get("technologies", [])
+                }
             except json.JSONDecodeError:
-                # Try to extract array from text
-                import re
-                match = re.search(r'\[(.*?)\]', content)
-                if match:
-                    skills_str = match.group(1)
-                    return [s.strip().strip('"').strip("'") for s in skills_str.split(",")]
-
-            return []
+                return {
+                    "skills": [],
+                    "years_of_experience": 0,
+                    "education": "",
+                    "technologies": []
+                }
         except Exception as e:
-            raise AIException(f"Failed to extract skills: {str(e)}")
+            raise AIException(f"Failed to extract resume details: {str(e)}")
+
+    async def generate_interview_questions_enhanced(
+        self,
+        job_title: str,
+        job_description: str,
+        skills_required: List[str],
+        difficulty: str = "medium",
+        count: int = 5
+    ) -> List[Dict]:
+        """Generate enhanced interview questions with skill linkage.
+
+        Args:
+            job_title: Job title
+            job_description: Job description
+            skills_required: List of required skills
+            difficulty: Question difficulty (easy/medium/hard)
+            count: Number of questions to generate
+
+        Returns:
+            List of questions with skill, category, and difficulty
+        """
+        skills_str = ", ".join(skills_required) if skills_required else "general"
+
+        prompt = f"""Generate {count} interview questions for a {job_title} position.
+Job Description: {job_description}
+Required Skills: {skills_str}
+Difficulty Level: {difficulty}
+
+For each question include:
+- question: The question text
+- skill: The skill this question tests (one of the required skills)
+- category: concept/application/advanced (what type of question)
+- difficulty: easy/medium/hard
+
+Return a JSON array of objects with this format:
+[{{
+    "question": "question text",
+    "skill": "Python",
+    "category": "concept/application/advanced",
+    "difficulty": "easy/medium/hard"
+}}]
+
+Return ONLY valid JSON, no other text."""
+
+        try:
+            response = await self.client.chat.completions.create(
+                model="llama-3.3-70b-versatile",
+                messages=[
+                    {"role": "system", "content": "You are an expert HR professional. Generate relevant interview questions linked to specific skills."},
+                    {"role": "user", "content": prompt}
+                ],
+                temperature=0.5,
+                max_tokens=2000
+            )
+
+            content = response.choices[0].message.content
+            try:
+                questions = json.loads(content)
+                if isinstance(questions, list):
+                    # Validate and normalize each question
+                    normalized = []
+                    for q in questions:
+                        normalized.append({
+                            "question": q.get("question", ""),
+                            "skill": q.get("skill", skills_required[0] if skills_required else "general"),
+                            "category": q.get("category", "application"),
+                            "difficulty": q.get("difficulty", difficulty)
+                        })
+                    return normalized
+                return []
+            except json.JSONDecodeError:
+                return []
+        except Exception as e:
+            raise AIException(f"Failed to generate enhanced questions: {str(e)}")
+
+    async def extract_skills_from_resume(self, resume_text: str) -> List[str]:
+        """Extract skills from resume text using AI.
+
+        Args:
+            resume_text: Raw resume text content
+
+        Returns:
+            List of extracted skill names
+        """
+        # Use the enhanced method and extract just skills
+        details = await self.extract_resume_details(resume_text)
+        return details.get("skills", [])
 
     async def generate_interview_questions(
         self,

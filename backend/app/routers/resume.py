@@ -8,6 +8,7 @@ from app.models.user import ResumeResponse
 from app.models.response import APIResponse
 from app.services.groq import groq_service
 from app.services.supabase import supabase_service
+from app.services.resume_service import create_resume_service, ResumeProcessingService
 
 router = APIRouter(prefix="/resume", tags=["resume"])
 
@@ -18,67 +19,42 @@ async def upload_resume(
     supabase: AsyncClient = Depends(get_supabase),
     current_user: dict = Depends(get_current_user)
 ):
-    """Upload and parse a resume."""
+    """Upload and parse a resume.
+
+    Supports PDF, TXT, DOC, and DOCX files.
+    Extracts text and uses AI to analyze skills, experience, and education.
+    """
     try:
         # Read file content
         content = await file.read()
 
-        # For PDF files, we'd need to extract text first
-        # For now, we'll handle text-based files
+        # Determine file extension
         file_extension = file.filename.split(".")[-1].lower() if "." in file.filename else ""
 
         if file_extension not in ["txt", "pdf", "doc", "docx"]:
             raise HTTPException(status_code=400, detail="Unsupported file type")
 
-        # Upload file to Supabase Storage
-        file_path = f"resumes/{current_user.id}/{file.filename}"
+        # Use the resume processing service
+        service: ResumeProcessingService = create_resume_service(supabase)
 
         try:
-            storage_response = await supabase.storage.from_("resumes").upload(
-                path=file_path,
-                file=content,
-                file_options={"content_type": file.content_type}
+            # Process the resume (extract text, analyze with AI, upload to storage)
+            resume_data = await service.process_resume(
+                file_content=content,
+                file_name=file.filename,
+                user_id=current_user.id,
+                content_type=file.content_type or "application/octet-stream"
             )
-        except Exception as storage_error:
-            # If storage upload fails, continue without storing file
-            file_path = ""
+        except ValueError as e:
+            raise HTTPException(status_code=400, detail=str(e))
 
-        # Extract text from resume
-        # For now, we'll assume it's a text file or extract text from PDF
-        resume_text = ""
-
-        if file_extension == "txt":
-            resume_text = content.decode("utf-8", errors="ignore")
-        elif file_extension == "pdf":
-            # In production, use a PDF parser like PyPDF2 or pdfplumber
-            # For now, we'll skip PDF text extraction
-            resume_text = ""  # Would need PDF parsing library
-
-        # Extract skills using AI
-        skills = []
-        if resume_text:
-            try:
-                skills = await groq_service.extract_skills_from_resume(resume_text)
-            except Exception:
-                skills = []
-
-        # Create resume record
-        resume_data = {
-            "user_id": current_user.id,
-            "file_name": file.filename,
-            "file_path": file_path,
-            "skills": skills,
-            "parsed_data": {
-                "text": resume_text[:5000] if len(resume_text) > 5000 else resume_text  # Limit text stored
-            }
-        }
-
+        # Insert into database
         response = await supabase.table("resumes").insert(resume_data).execute()
 
         if not response.data:
             raise HTTPException(status_code=400, detail="Failed to create resume")
 
-        return APIResponse(data=response.data[0], message="Resume uploaded successfully")
+        return APIResponse(data=response.data[0], message="Resume uploaded and analyzed successfully")
     except HTTPException:
         raise
     except Exception as e:

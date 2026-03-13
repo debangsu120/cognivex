@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.config import settings
-from app.routers import auth, users, companies, jobs, interviews, resume
+from app.routers import auth, users, companies, jobs, interviews, resume, dashboard, rankings
 
 app = FastAPI(
     title=settings.app_name,
@@ -26,6 +26,8 @@ app.include_router(companies.router, prefix="/api/v1")
 app.include_router(jobs.router, prefix="/api/v1")
 app.include_router(interviews.router, prefix="/api/v1")
 app.include_router(resume.router, prefix="/api/v1")
+app.include_router(dashboard.router, prefix="/api/v1")
+app.include_router(rankings.router, prefix="/api/v1")
 
 
 @app.get("/")
