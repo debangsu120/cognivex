@@ -1,0 +1,79 @@
+# Environment variables - NEVER commit these
+.env
+.env.local
+.env.production
+.env.*.local
+backend/.env
+ai-interviewer/.env
+.env.docker
+
+
+# Dependencies
+node_modules/
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+.venv/
+
+# Build outputs
+dist/
+build/
+*.egg-info/
+.eggs/
+*.apk
+*.aab
+
+# Expo & React Native - ai-interviewer
+ai-interviewer/node_modules/
+ai-interviewer/.expo/
+ai-interviewer/android/
+ai-interviewer/ios/
+ai-interviewer/dist/
+ai-interviewer/.expo-shared/
+
+# Python - backend
+backend/__pycache__/
+backend/node_modules/
+backend/dist/
+backend/build/
+*.pyc
+__pycache__/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*.sublime-*
+
+# OS files
+.DS_Store
+Thumbs.db
+*.log
+
+# Testing
+coverage/
+.nyc_output/
+
+# Temporary files
+*.tmp
+.cache/
+
+# Claude
+.claude/
+
+# Frontend source (keeping in repo)
+# 1st page/
+# candidate dashboard/
+# dashboard/
+# interview details/
+# interview results/
+# live ai interview/
+# recruiter dashboard/
+
+

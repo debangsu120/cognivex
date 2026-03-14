@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#e2e8f0",
+                        "background-light": "#f8f7f5",
+                        "background-dark": "#121212",
+                        "surface-dark": "#1E1E1E",
+                        "border-dark": "#2d2d2d",
+                        "charcoal": {
+                            "800": "#1a1a1a",
+                            "900": "#0f0f0f",
+                        }
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.5rem",
+                        "lg": "1rem",
+                        "xl": "1.5rem",
+                        "2xl": "1.75rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }</script>
+<style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .waveform-bar {
+            width: 3px;
+            background-color: #e2e8f0;
+            border-radius: 99px;
+        }
+    </style>
+<style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .waveform-bar {
+            width: 3px;
+            background-color: #e2e8f0;
+            border-radius: 99px;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen flex flex-col font-display">
+<!-- Header Section -->
+<header class="flex items-center justify-between px-6 pt-8 pb-4">
+<button class="flex h-10 w-10 items-center justify-center rounded-full bg-charcoal-800 border border-white/5 text-slate-100">
+<span class="material-symbols-outlined">arrow_back_ios_new</span>
+</button>
+<div class="flex flex-col items-center">
+<span class="text-[10px] uppercase tracking-widest text-slate-400 font-semibold">Live Session</span>
+<h2 class="text-sm font-medium text-slate-100">AI Interview in Progress</h2>
+</div>
+<div class="w-10"></div> <!-- Spacer for balance -->
+</header>
+<!-- Timer Section -->
+<div class="flex justify-center px-6 py-2">
+<div class="flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20">
+<div class="size-2 rounded-full bg-primary animate-pulse"></div>
+<p class="text-primary text-sm font-bold tracking-tight">04:12</p>
+</div>
+</div>
+<!-- Main Content Area -->
+<main class="flex-1 flex flex-col items-center justify-center px-6 gap-12">
+<!-- AI Avatar Section -->
+<div class="relative">
+<!-- Animated Rings -->
+<div class="absolute inset-0 rounded-full border-2 border-primary/30 scale-125 opacity-20"></div>
+<div class="absolute inset-0 rounded-full border border-primary/50 scale-110 opacity-40"></div>
+<div class="relative size-48 rounded-full bg-gradient-to-b from-charcoal-800 to-charcoal-900 border-4 border-white/5 flex items-center justify-center overflow-hidden shadow-2xl">
+<img class="w-full h-full object-cover opacity-80" data-alt="Futuristic AI bot avatar with sleek design" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC6o46W_RDiw0nXU3tCfWq4IeTbeWBNsbeS9UmPSS5RM_aS2KcP-rkQREKWmT0odSCAWZv6Ry6vgnbV0dq_KYNeGMJFQ85zv0RpjvGejKutX-IrFODucM_ZwO-M-7XDy4Td9kGKE3EUvDQ1qgEw0xp46I8WJ2mLt-UTv6CuaJgA9TScOpiLRS2Vedda1Y3_dBbQFbLW2tEQsHiFmKgMILB5Ie5TMQgzkJLOGM2gs4RQ1WEkpY0_FKZyY4BOjmTTf9P2C7jaqxjM5vo"/>
+<div class="absolute inset-0 bg-primary/5 mix-blend-overlay"></div>
+</div>
+</div>
+<!-- Speech Bubble -->
+<div class="w-full max-w-sm glass-card rounded-2xl p-6 shadow-xl relative">
+<div class="absolute -top-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-[#232323] rotate-45 border-l border-t border-white/5"></div>
+<p class="text-slate-400 text-xs font-medium uppercase tracking-wider mb-2">AI Interviewer</p>
+<p class="text-slate-100 text-xl font-semibold leading-snug">
+                "What is REST API and how does it work?"
+            </p>
+</div>
+<!-- Audio Visualization & Listening Indicator -->
+<div class="w-full flex flex-col items-center gap-6">
+<div class="flex items-end justify-center gap-1 h-12">
+<div class="waveform-bar h-4"></div>
+<div class="waveform-bar h-8"></div>
+<div class="waveform-bar h-12"></div>
+<div class="waveform-bar h-6"></div>
+<div class="waveform-bar h-10"></div>
+<div class="waveform-bar h-3"></div>
+<div class="waveform-bar h-7"></div>
+<div class="waveform-bar h-11"></div>
+<div class="waveform-bar h-5"></div>
+</div>
+<div class="flex items-center gap-2">
+<span class="text-slate-400 text-sm font-medium">Listening...</span>
+</div>
+<!-- Active Microphone Button -->
+<button class="relative size-20 rounded-full bg-slate-100 flex items-center justify-center shadow-[0_0_40px_rgba(255,255,255,0.1)] hover:scale-105 transition-transform">
+<span class="material-symbols-outlined text-4xl fill-1 text-slate-900">mic</span>
+<div class="absolute inset-0 rounded-full border-4 border-white/20"></div>
+</button>
+</div>
+</main>
+<!-- Bottom Controls -->
+<footer class="p-8 pb-12 flex gap-4">
+<button class="flex-1 h-16 rounded-2xl bg-charcoal-800 border border-white/5 flex items-center justify-center gap-2 text-slate-100 font-semibold hover:bg-charcoal-800/80 transition-colors shadow-lg">
+<span class="material-symbols-outlined text-slate-400">mic_off</span>
+            Mute Mic
+        </button>
+<button class="flex-1 h-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center gap-2 text-red-500 font-semibold hover:bg-white/10 transition-colors shadow-lg">
+<span class="material-symbols-outlined">call_end</span>
+            End Interview
+        </button>
+</footer>
+<!-- Bottom Navigation Bar (Optional Context) -->
+<div class="border-t border-white/5 bg-charcoal-900/50 backdrop-blur-md px-6 py-4 flex justify-between items-center">
+<a class="text-primary flex flex-col items-center gap-1" href="#">
+<span class="material-symbols-outlined fill-1">home</span>
+</a>
+<a class="text-slate-500 flex flex-col items-center gap-1" href="#">
+<span class="material-symbols-outlined">history</span>
+</a>
+<a class="text-slate-500 flex flex-col items-center gap-1" href="#">
+<span class="material-symbols-outlined">person</span>
+</a>
+<a class="text-slate-500 flex flex-col items-center gap-1" href="#">
+<span class="material-symbols-outlined">settings</span>
+</a>
+</div>
+</body></html>
