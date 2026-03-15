@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
 from supabase import AsyncClient
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
 from app.deps import get_supabase, get_current_user
 from app.models.user import JobCreate, JobUpdate, JobResponse
 from app.models.interview import CandidateMatch
@@ -184,5 +184,89 @@ async def get_matching_candidates(
         return APIResponse(data=matches)
     except HTTPException:
         raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/recommendations/for-me", response_model=APIResponse[List[Dict]])
+async def get_job_recommendations(
+    limit: int = Query(10, ge=1, le=50),
+    use_ai: bool = Query(False),
+    supabase: AsyncClient = Depends(get_supabase),
+    current_user: dict = Depends(get_current_user)
+):
+    """Get job recommendations for the current candidate based on their resume/skills.
+
+    Returns jobs that match the candidate's skills, sorted by match score.
+    """
+    try:
+        # Get candidate's resume
+        resumes_response = await supabase.table("resumes").select("*").eq("user_id", current_user.id).execute()
+
+        if not resumes_response.data:
+            # No resume uploaded yet - return recent jobs without matching
+            jobs_response = await supabase.table("jobs").select("*, companies(*)").eq("is_active", True).order("created_at", desc=True).limit(limit).execute()
+            jobs = []
+            for job in jobs_response.data:
+                jobs.append({
+                    "job": job,
+                    "match_score": 0,
+                    "message": "Upload your resume to see matching jobs"
+                })
+            return APIResponse(data=jobs, message="No resume found. Upload a resume to see personalized recommendations.")
+
+        # Get matching jobs
+        matches = await matching_service.find_matching_jobs(
+            candidate_id=current_user.id,
+            limit=limit,
+            use_ai=use_ai
+        )
+
+        # Format response
+        results = []
+        for match in matches:
+            job_data = match.get("job", {})
+            results.append({
+                "job": job_data,
+                "job_id": job_data.get("id"),
+                "job_title": job_data.get("title"),
+                "company_name": job_data.get("companies", {}).get("name") if isinstance(job_data.get("companies"), dict) else None,
+                "match_score": match.get("match_score", 0),
+                "skills_match_score": match.get("skills_match_score", 0),
+                "experience_match_score": match.get("experience_match_score", 0),
+                "matched_skills": match.get("matched_skills", []),
+                "missing_skills": match.get("missing_skills", []),
+            })
+
+        return APIResponse(data=results, message=f"Found {len(results)} matching jobs")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/recommendations/candidate/{candidate_id}", response_model=APIResponse[List[Dict]])
+async def get_job_recommendations_for_candidate(
+    candidate_id: str,
+    limit: int = Query(10, ge=1, le=50),
+    use_ai: bool = Query(False),
+    supabase: AsyncClient = Depends(get_supabase),
+    current_user: dict = Depends(get_current_user)
+):
+    """Get job recommendations for a specific candidate (for recruiters)."""
+    try:
+        matches = await matching_service.find_matching_jobs(
+            candidate_id=candidate_id,
+            limit=limit,
+            use_ai=use_ai
+        )
+
+        results = []
+        for match in matches:
+            job_data = match.get("job", {})
+            results.append({
+                "job": job_data,
+                "match_score": match.get("match_score", 0),
+            })
+
+        return APIResponse(data=results)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

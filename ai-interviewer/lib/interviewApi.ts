@@ -1,106 +1,37 @@
 // Interview API Service
-import { API_BASE_URL } from './api';
+import { apiClient } from './apiClient';
+import { supabase } from './api';
 import type { Interview, Question, Answer, Score } from './api';
 
-const getAuthHeaders = async () => {
-  // Get token from AsyncStorage or secure storage
-  const token = await getToken();
-  return {
-    'Content-Type': 'application/json',
-    'Authorization': token ? `Bearer ${token}` : '',
-  };
-};
-
-const getToken = async (): Promise<string | null> => {
-  // This should be implemented with secure storage
-  // For now, return null - will be handled by the auth context
-  return null;
-};
-
-// Interview API functions
+// Interview API functions using centralized API client
 export const interviewApi = {
   // List all interviews for current user
   list: async (candidateId?: string, jobId?: string): Promise<Interview[]> => {
-    const headers = await getAuthHeaders();
-    const params = new URLSearchParams();
-    if (candidateId) params.append('candidate_id', candidateId);
-    if (jobId) params.append('job_id', jobId);
+    const params: Record<string, string> = {};
+    if (candidateId) params.candidate_id = candidateId;
+    if (jobId) params.job_id = jobId;
 
-    const response = await fetch(`${API_BASE_URL}/interviews?${params}`, {
-      method: 'GET',
-      headers,
-    });
-
-    if (!response.ok) {
-      throw new Error('Failed to fetch interviews');
-    }
-
-    const result = await response.json();
-    return result.data || [];
+    return apiClient.get<Interview[]>('/interviews', params);
   },
 
   // Get single interview by ID
   get: async (interviewId: string): Promise<Interview> => {
-    const headers = await getAuthHeaders();
-    const response = await fetch(`${API_BASE_URL}/interviews/${interviewId}`, {
-      method: 'GET',
-      headers,
-    });
-
-    if (!response.ok) {
-      throw new Error('Failed to fetch interview');
-    }
-
-    const result = await response.json();
-    return result.data;
+    return apiClient.get<Interview>(`/interviews/${interviewId}`);
   },
 
   // Start an interview
   start: async (interviewId: string): Promise<Interview> => {
-    const headers = await getAuthHeaders();
-    const response = await fetch(`${API_BASE_URL}/interviews/${interviewId}/start`, {
-      method: 'POST',
-      headers,
-    });
-
-    if (!response.ok) {
-      throw new Error('Failed to start interview');
-    }
-
-    const result = await response.json();
-    return result.data;
+    return apiClient.post<Interview>(`/interviews/${interviewId}/start`);
   },
 
   // Get all questions for an interview
   getQuestions: async (interviewId: string): Promise<Question[]> => {
-    const headers = await getAuthHeaders();
-    const response = await fetch(`${API_BASE_URL}/interviews/${interviewId}/questions`, {
-      method: 'GET',
-      headers,
-    });
-
-    if (!response.ok) {
-      throw new Error('Failed to fetch questions');
-    }
-
-    const result = await response.json();
-    return result.data || [];
+    return apiClient.get<Question[]>(`/interviews/${interviewId}/questions`);
   },
 
   // Get next question
   getNextQuestion: async (interviewId: string): Promise<Question | null> => {
-    const headers = await getAuthHeaders();
-    const response = await fetch(`${API_BASE_URL}/interviews/${interviewId}/next`, {
-      method: 'GET',
-      headers,
-    });
-
-    if (!response.ok) {
-      throw new Error('Failed to fetch next question');
-    }
-
-    const result = await response.json();
-    return result.data;
+    return apiClient.get<Question | null>(`/interviews/${interviewId}/next`);
   },
 
   // Submit text answer
@@ -108,40 +39,40 @@ export const interviewApi = {
     interviewId: string,
     questionId: string,
     answerText: string
-  ): Promise<Answer> => {
-    const headers = await getAuthHeaders();
-    const response = await fetch(`${API_BASE_URL}/interviews/${interviewId}/evaluate`, {
-      method: 'POST',
-      headers,
-      body: JSON.stringify({
-        question_id: questionId,
-        answer_text: answerText,
-      }),
+  ): Promise<any> => {
+    return apiClient.post<any>(`/interviews/${interviewId}/evaluate`, {
+      question_id: questionId,
+      answer_text: answerText,
     });
-
-    if (!response.ok) {
-      throw new Error('Failed to submit answer');
-    }
-
-    const result = await response.json();
-    return result.data.answer;
   },
 
-  // Upload audio answer
+  // Upload audio answer (using FormData for file upload)
   submitAudioAnswer: async (
     interviewId: string,
     questionId: string,
-    audioBlob: Blob
-  ): Promise<Answer> => {
-    const headers = await getAuthHeaders();
+    audioUri: string
+  ): Promise<any> => {
+    // Create form data for file upload
     const formData = new FormData();
     formData.append('question_id', questionId);
-    formData.append('audio', audioBlob, 'recording.webm');
 
-    const response = await fetch(`${API_BASE_URL}/interviews/${interviewId}/audio`, {
+    // Append audio file
+    const filename = audioUri.split('/').pop() || 'recording.m4a';
+    const match = /\.(\w+)$/.exec(filename);
+    const type = match ? `audio/${match[1]}` : 'audio/m4a';
+
+    formData.append('audio', {
+      uri: audioUri,
+      name: filename,
+      type,
+    } as any);
+
+    // Use fetch directly for multipart form data
+    const token = await getToken();
+    const response = await fetch(`http://localhost:8000/api/v1/interviews/${interviewId}/audio`, {
       method: 'POST',
       headers: {
-        'Authorization': headers.Authorization,
+        'Authorization': token ? `Bearer ${token}` : '',
       },
       body: formData,
     });
@@ -156,66 +87,22 @@ export const interviewApi = {
 
   // Get interview score
   getScore: async (interviewId: string): Promise<Score> => {
-    const headers = await getAuthHeaders();
-    const response = await fetch(`${API_BASE_URL}/interviews/${interviewId}/score`, {
-      method: 'GET',
-      headers,
-    });
-
-    if (!response.ok) {
-      throw new Error('Failed to fetch score');
-    }
-
-    const result = await response.json();
-    return result.data;
+    return apiClient.get<Score>(`/interviews/${interviewId}/score`);
   },
 
   // Get interview state
-  getState: async (interviewId: string) => {
-    const headers = await getAuthHeaders();
-    const response = await fetch(`${API_BASE_URL}/interviews/${interviewId}/state`, {
-      method: 'GET',
-      headers,
-    });
-
-    if (!response.ok) {
-      throw new Error('Failed to fetch interview state');
-    }
-
-    const result = await response.json();
-    return result.data;
+  getState: async (interviewId: string): Promise<any> => {
+    return apiClient.get<any>(`/interviews/${interviewId}/state`);
   },
 
   // Complete interview manually
   complete: async (interviewId: string): Promise<Interview> => {
-    const headers = await getAuthHeaders();
-    const response = await fetch(`${API_BASE_URL}/interviews/${interviewId}/complete`, {
-      method: 'POST',
-      headers,
-    });
-
-    if (!response.ok) {
-      throw new Error('Failed to complete interview');
-    }
-
-    const result = await response.json();
-    return result.data;
+    return apiClient.post<Interview>(`/interviews/${interviewId}/complete`);
   },
 
   // Get transcript
-  getTranscript: async (interviewId: string) => {
-    const headers = await getAuthHeaders();
-    const response = await fetch(`${API_BASE_URL}/interviews/${interviewId}/transcript`, {
-      method: 'GET',
-      headers,
-    });
-
-    if (!response.ok) {
-      throw new Error('Failed to fetch transcript');
-    }
-
-    const result = await response.json();
-    return result.data;
+  getTranscript: async (interviewId: string): Promise<any> => {
+    return apiClient.get<any>(`/interviews/${interviewId}/transcript`);
   },
 
   // Get interview report
@@ -223,25 +110,47 @@ export const interviewApi = {
     interviewId: string,
     reportType: 'candidate' | 'recruiter' = 'recruiter',
     includeTranscript: boolean = true
-  ) => {
-    const headers = await getAuthHeaders();
-    const params = new URLSearchParams({
+  ): Promise<any> => {
+    return apiClient.get<any>(`/interviews/${interviewId}/report`, {
       report_type: reportType,
       include_transcript: includeTranscript.toString(),
     });
+  },
 
-    const response = await fetch(`${API_BASE_URL}/interviews/${interviewId}/report?${params}`, {
-      method: 'GET',
-      headers,
+  // Get detailed evaluation
+  getDetailedEvaluation: async (
+    interviewId: string,
+    questionId: string
+  ): Promise<any> => {
+    return apiClient.get<any>(`/interviews/${interviewId}/evaluate/detailed`, {
+      question_id: questionId,
     });
+  },
 
-    if (!response.ok) {
-      throw new Error('Failed to fetch report');
-    }
+  // Get skill aggregates
+  getSkillAggregates: async (interviewId: string): Promise<any> => {
+    return apiClient.get<any>(`/interviews/${interviewId}/skills/aggregate`);
+  },
 
-    const result = await response.json();
-    return result.data;
+  // Get comprehensive report
+  getComprehensiveReport: async (
+    interviewId: string,
+    candidateName: string = 'Candidate'
+  ): Promise<any> => {
+    return apiClient.post<any>(`/interviews/${interviewId}/report/comprehensive`, {
+      candidate_name: candidateName,
+    });
   },
 };
+
+// Helper to get token for audio upload
+async function getToken(): Promise<string | null> {
+  try {
+    const { data } = await supabase.auth.getSession();
+    return data.session?.access_token || null;
+  } catch {
+    return null;
+  }
+}
 
 export default interviewApi;

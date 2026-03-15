@@ -81,14 +81,14 @@ export function useInterview(interviewId?: string) {
   }, [interviewId]);
 
   // Submit audio answer
-  const submitAudioAnswer = useCallback(async (questionId: string, audioBlob: Blob) => {
+  const submitAudioAnswer = useCallback(async (questionId: string, audioUri: string) => {
     if (!interviewId) return;
 
     setIsRecording(true);
     setLoading(true);
     setError(null);
     try {
-      const answer = await interviewApi.submitAudioAnswer(interviewId, questionId, audioBlob);
+      const answer = await interviewApi.submitAudioAnswer(interviewId, questionId, audioUri);
       setAnswers(prev => [...prev, answer]);
 
       // Get next question

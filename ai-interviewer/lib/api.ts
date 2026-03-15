@@ -133,3 +133,112 @@ export interface CandidateStats {
   shortlisted: number;
   rejected: number;
 }
+
+// =============================================================================
+// Recruiter Platform Types - Phase 4
+// =============================================================================
+
+export interface JobWithStats extends Job {
+  stats: {
+    total_interviews: number;
+    unique_candidates: number;
+    completed_interviews: number;
+    average_score: number | null;
+  };
+}
+
+export interface RankedCandidate {
+  interview_id: string;
+  candidate_id: string;
+  candidate_name: string;
+  candidate_avatar?: string;
+  candidate_email?: string;
+  overall_score: number;
+  skill_match_score?: number;
+  rank: number;
+  candidate_status: 'pending' | 'shortlisted' | 'rejected' | 'offered';
+  technical_score?: number;
+  communication_score?: number;
+  recommendation?: string;
+}
+
+export interface CandidateReport {
+  candidate: {
+    name: string;
+    email: string;
+    avatar?: string;
+  };
+  job: {
+    title: string;
+    company: string;
+    location?: string;
+  };
+  interview: {
+    status: string;
+    difficulty: string;
+    duration_minutes: number;
+    completed_at?: string;
+  };
+  overall_score: number;
+  skill_breakdown: {
+    technical: number;
+    communication: number;
+    problem_solving: number;
+    cultural_fit: number;
+  };
+  strengths: string[];
+  weaknesses: string[];
+  summary: string;
+  recommendation: string;
+  transcript: TranscriptEntry[];
+  candidate_status: string;
+}
+
+export interface TranscriptEntry {
+  question_number: number;
+  question: string;
+  category?: string;
+  skill?: string;
+  answer?: string;
+  score?: number;
+  feedback?: string;
+}
+
+export interface JobAnalytics {
+  job_id: string;
+  job_title: string;
+  total_completed: number;
+  average_scores: {
+    overall: number | null;
+    technical: number | null;
+    communication: number | null;
+    problem_solving: number | null;
+  };
+  top_candidates: RankedCandidate[];
+  skill_gaps: string[];
+  completion_rate: number;
+}
+
+export interface RecruiterDashboard {
+  company: {
+    id: string;
+    name: string;
+  } | null;
+  stats: {
+    total_jobs: number;
+    active_jobs: number;
+    total_candidates: number;
+    total_interviews: number;
+    completed_interviews: number;
+  };
+  recent_activity: Activity[];
+}
+
+export interface Activity {
+  type: string;
+  interview_id: string;
+  candidate_name: string;
+  job_title?: string;
+  status: string;
+  timestamp: string;
+}

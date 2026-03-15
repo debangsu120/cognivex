@@ -1,39 +1,60 @@
 {
   "expo": {
-    "name": "ai-interviewer",
-    "slug": "ai-interviewer",
+    "name": "CogniVex AI Interview",
+    "slug": "cognivex-ai-interviewer",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "dark",
-    "scheme": "aiinterviewer",
+    "scheme": "cognivex",
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
-      "backgroundColor": "#0B0B0C"
+      "backgroundColor": "#1a1a2e"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.cognivex.interviewer",
+      "infoPlist": {
+        "NSMicrophoneUsageDescription": "CogniVex needs access to your microphone to record interview answers."
+      }
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#0B0B0C",
+        "backgroundColor": "#1a1a2e",
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
-      "predictiveBackGestureEnabled": false,
-      "package": "com.anonymous.aiinterviewer"
+      "package": "com.cognivex.interviewer",
+      "versionCode": 1,
+      "permissions": [
+        "RECORD_AUDIO",
+        "INTERNET",
+        "ACCESS_NETWORK_STATE"
+      ],
+      "predictiveBackGestureEnabled": false
     },
     "web": {
       "favicon": "./assets/favicon.png",
       "bundler": "metro"
     },
     "plugins": [
-      "expo-router"
+      "expo-router",
+      [
+        "expo-av",
+        {
+          "microphonePermission": "CogniVex needs access to your microphone to record interview answers."
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "eas": {
+        "projectId": "cognivex-ai-interviewer"
+      }
     }
   }
 }

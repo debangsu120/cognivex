@@ -725,3 +725,312 @@ async def _check_and_complete_interview(supabase: AsyncClient, interview_id: str
             "status": "completed",
             "completed_at": datetime.utcnow().isoformat()
         }).eq("id", interview_id).execute()
+
+
+# =============================================================================
+# AI INTERVIEW BEHAVIOR ENGINE - PHASE 3 ENDPOINTS
+# =============================================================================
+
+@router.post("/{interview_id}/questions/progressive", response_model=APIResponse[List[Dict[str, Any]]])
+async def generate_progressive_questions(
+    interview_id: str,
+    skill: str,
+    candidate_level: str = "intermediate",
+    count_per_level: int = 2,
+    supabase: AsyncClient = Depends(get_supabase),
+    current_user: dict = Depends(get_current_user)
+):
+    """Generate progressive interview questions for a skill.
+
+    Questions progress through difficulty levels:
+    - beginner: Basic concepts and definitions
+    - intermediate: Practical applications
+    - advanced: Edge cases and optimization
+
+    Args:
+        interview_id: Interview ID
+        skill: Skill to generate questions for
+        candidate_level: Expected candidate level
+        count_per_level: Questions per difficulty level
+    """
+    try:
+        # Verify interview exists
+        interview = await supabase.table("interviews").select("*, jobs(*)").eq("id", interview_id).execute()
+        if not interview.data:
+            raise HTTPException(status_code=404, detail="Interview not found")
+
+        job_title = interview.data[0].get("jobs", {}).get("title", "Position") if isinstance(interview.data[0].get("jobs"), dict) else "Position"
+
+        # Generate progressive questions
+        questions = await groq_service.generate_progressive_questions(
+            skill=skill,
+            job_title=job_title,
+            candidate_level=candidate_level,
+            count_per_level=count_per_level
+        )
+
+        return APIResponse(
+            data=questions,
+            message=f"Generated {len(questions)} progressive questions for {skill}"
+        )
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/{interview_id}/follow-up", response_model=APIResponse[Optional[Dict[str, Any]]])
+async def generate_follow_up(
+    interview_id: str,
+    question_id: str,
+    supabase: AsyncClient = Depends(get_supabase),
+    current_user: dict = Depends(get_current_user)
+):
+    """Generate adaptive follow-up question based on answer quality.
+
+    The system analyzes the previous answer and generates an appropriate
+    follow-up:
+    - WEAK/POOR: Ask simpler clarifying question
+    - ADEQUATE: Probe deeper into the topic
+    - GOOD/EXCELLENT: Ask about edge cases or next-level concepts
+    """
+    try:
+        # Get the question and answer
+        question = await supabase.table("interview_questions").select("*").eq("id", question_id).execute()
+        if not question.data:
+            raise HTTPException(status_code=404, detail="Question not found")
+
+        # Get the answer if exists
+        answer = await supabase.table("interview_answers").select("*").eq("question_id", question_id).execute()
+        if not answer.data:
+            raise HTTPException(status_code=400, detail="No answer found for this question yet")
+
+        answer_data = answer.data[0]
+        answer_text = answer_data.get("answer_text") or answer_data.get("transcript", "")
+
+        # Get existing evaluation or create a basic one
+        score = answer_data.get("score", 50)
+        if score >= 85:
+            quality = "excellent"
+        elif score >= 70:
+            quality = "good"
+        elif score >= 50:
+            quality = "adequate"
+        elif score >= 30:
+            quality = "weak"
+        else:
+            quality = "poor"
+
+        evaluation = {
+            "quality": quality,
+            "score": score
+        }
+
+        # Generate follow-up question
+        follow_up = await groq_service.generate_follow_up_question(
+            original_question=question.data[0].get("question_text", ""),
+            candidate_answer=answer_text,
+            answer_evaluation=evaluation,
+            skill=question.data[0].get("skill", "general")
+        )
+
+        if follow_up:
+            # Save the follow-up question
+            follow_up_question = await supabase.table("interview_questions").insert({
+                "interview_id": interview_id,
+                "question_text": follow_up.get("question", ""),
+                "question_order": question.data[0].get("question_order", 0) + 0.5,
+                "category": "follow_up",
+                "difficulty": question.data[0].get("difficulty", "medium"),
+                "skill": question.data[0].get("skill", "general"),
+                "parent_question_id": question_id,
+                "follow_up_type": follow_up.get("type", "deepen")
+            }).execute()
+
+            return APIResponse(
+                data={**follow_up, "saved_question_id": follow_up_question.data[0]["id"] if follow_up_question.data else None},
+                message="Follow-up question generated"
+            )
+
+        return APIResponse(data=None, message="No follow-up needed - answer was comprehensive")
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/{interview_id}/evaluate/detailed", response_model=APIResponse[Dict[str, Any]])
+async def evaluate_answer_detailed(
+    interview_id: str,
+    question_id: str,
+    answer_text: Optional[str] = None,
+    supabase: AsyncClient = Depends(get_supabase),
+    current_user: dict = Depends(get_current_user)
+):
+    """Perform multi-dimensional answer evaluation with concept detection.
+
+    Evaluates answers across 5 dimensions:
+    - Technical Accuracy
+    - Depth of Understanding
+    - Communication Clarity
+    - Practical Application
+    - Completeness
+
+    Also detects concepts demonstrated and missing.
+    """
+    try:
+        # Get question
+        question = await supabase.table("interview_questions").select("*").eq("id", question_id).execute()
+        if not question.data:
+            raise HTTPException(status_code=404, detail="Question not found")
+
+        # Get answer if exists
+        answer = None
+        if answer_text is None:
+            existing = await supabase.table("interview_answers").select("*").eq("question_id", question_id).execute()
+            if existing.data:
+                answer = existing.data[0].get("answer_text") or existing.data[0].get("transcript", "")
+
+        if not answer and not answer_text:
+            raise HTTPException(status_code=400, detail="No answer provided")
+
+        text_to_evaluate = answer_text or answer
+
+        # Perform detailed evaluation
+        evaluation = await groq_service.evaluate_answer_detailed(
+            question=question.data[0],
+            answer=text_to_evaluate
+        )
+
+        return APIResponse(data=evaluation, message="Detailed evaluation complete")
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/{interview_id}/skills/aggregate", response_model=APIResponse[Dict[str, Any]])
+async def aggregate_skill_scores(
+    interview_id: str,
+    supabase: AsyncClient = Depends(get_supabase),
+    current_user: dict = Depends(get_current_user)
+):
+    """Aggregate scores across all answers to generate skill-level scores.
+
+    Groups evaluations by skill and calculates:
+    - Average score per skill
+    - Min/Max scores
+    - Consistency metric
+    - Strongest and weakest skills
+    """
+    try:
+        # Get all questions and answers
+        questions = await supabase.table("interview_questions").select("*").eq("interview_id", interview_id).execute()
+
+        skill_evaluations = []
+        skills_tested = set()
+
+        for q in questions.data:
+            answer = await supabase.table("interview_answers").select("*").eq("question_id", q["id"]).execute()
+            if answer.data:
+                eval_item = {
+                    "skill": q.get("skill", "general"),
+                    "question": q.get("question_text", ""),
+                    "category": q.get("category", "practical"),
+                    "overall_score": answer.data[0].get("score", 0),
+                    "dimensions": {
+                        "technical_accuracy": answer.data[0].get("technical_accuracy", 0),
+                        "communication_clarity": answer.data[0].get("communication_clarity", 0),
+                        "practical_application": answer.data[0].get("practical_application", 0),
+                        "completeness": answer.data[0].get("completeness", 0)
+                    }
+                }
+                skill_evaluations.append(eval_item)
+                skills_tested.add(q.get("skill", "general"))
+
+        # Aggregate scores
+        aggregates = await groq_service.aggregate_skill_scores(
+            skill_evaluations=skill_evaluations,
+            skills_tested=list(skills_tested)
+        )
+
+        return APIResponse(data=aggregates, message="Skill scores aggregated")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/{interview_id}/report/comprehensive", response_model=APIResponse[Dict[str, Any]])
+async def generate_comprehensive_report(
+    interview_id: str,
+    candidate_name: str = "Candidate",
+    supabase: AsyncClient = Depends(get_supabase),
+    current_user: dict = Depends(get_current_user)
+):
+    """Generate a comprehensive structured interview report.
+
+    Report includes:
+    1. Executive Summary
+    2. Skill-by-Skill Breakdown
+    3. Dimension Analysis
+    4. Behavioral Observations
+    5. Strengths & Areas for Growth
+    6. Recommendation with Justification
+    """
+    try:
+        # Get interview data
+        interview = await supabase.table("interviews").select("*, jobs(*), interview_questions(*), interview_answers(*), interview_scores(*)").eq("id", interview_id).execute()
+        if not interview.data:
+            raise HTTPException(status_code=404, detail="Interview not found")
+
+        data = interview.data[0]
+        job_title = data.get("jobs", {}).get("title", "Position") if isinstance(data.get("jobs"), dict) else "Position"
+
+        # Calculate duration
+        created_at = data.get("created_at")
+        completed_at = data.get("completed_at")
+        duration_minutes = 0
+        if created_at and completed_at:
+            from datetime import datetime
+            start = datetime.fromisoformat(created_at.replace("Z", "+00:00"))
+            end = datetime.fromisoformat(completed_at.replace("Z", "+00:00"))
+            duration_minutes = int((end - start).total_seconds() / 60)
+
+        # Get skill evaluations
+        questions = data.get("interview_questions", [])
+        answers = data.get("interview_answers", [])
+
+        skill_evaluations = []
+        for q in questions:
+            for a in answers:
+                if a.get("question_id") == q.get("id"):
+                    skill_evaluations.append({
+                        "skill": q.get("skill", "general"),
+                        "question": q.get("question_text", ""),
+                        "overall_score": a.get("score", 0),
+                        "dimensions": {
+                            "technical_accuracy": a.get("technical_accuracy", 0),
+                            "communication_clarity": a.get("communication_clarity", 0)
+                        }
+                    })
+
+        # Aggregate skills
+        skills_tested = list(set(e["skill"] for e in skill_evaluations))
+        skill_aggregates = await groq_service.aggregate_skill_scores(
+            skill_evaluations=skill_evaluations,
+            skills_tested=skills_tested
+        )
+
+        # Generate comprehensive report
+        report = await groq_service.generate_interview_report(
+            candidate_name=candidate_name,
+            job_title=job_title,
+            skill_evaluations=skill_evaluations,
+            skill_aggregates=skill_aggregates,
+            interview_duration_minutes=duration_minutes
+        )
+
+        return APIResponse(data=report, message="Comprehensive report generated")
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))

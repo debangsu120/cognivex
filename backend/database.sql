@@ -85,6 +85,7 @@ CREATE TABLE IF NOT EXISTS interviews (
     duration_minutes INTEGER DEFAULT 30,
     difficulty TEXT DEFAULT 'medium',
     status TEXT DEFAULT 'scheduled',
+    candidate_status TEXT DEFAULT 'pending' CHECK (candidate_status IN ('pending', 'shortlisted', 'rejected', 'offered')),
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );

@@ -6,6 +6,7 @@ export const COLORS = {
   surface: "#1E1E1E",
   primary: "#FFFFFF",
   primaryMuted: "#e2e8f0",
+  text: "#FFFFFF",
   textMuted: "#8E8E93",
   textSecondary: "#71717A",
   success: "#10B981",

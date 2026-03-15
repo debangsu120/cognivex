@@ -6,17 +6,46 @@ import type { User } from '../lib/api';
 interface AuthContextType {
   user: User | null;
   loading: boolean;
+  session: any | null;
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (email: string, password: string, fullName: string, role: 'candidate' | 'recruiter') => Promise<void>;
   signOut: () => Promise<void>;
   updateProfile: (updates: Partial<User>) => Promise<void>;
+  refreshSession: () => Promise<void>;
+  getAccessToken: () => Promise<string | null>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
+  const [session, setSession] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
+
+  // Get access token for API calls
+  const getAccessToken = async (): Promise<string | null> => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      return session?.access_token || null;
+    } catch (error) {
+      console.error('Error getting access token:', error);
+      return null;
+    }
+  };
+
+  // Refresh session
+  const refreshSession = async (): Promise<void> => {
+    try {
+      const { data, error } = await supabase.auth.refreshSession();
+      if (error) throw error;
+      if (data.session) {
+        setSession(data.session);
+      }
+    } catch (error) {
+      console.error('Error refreshing session:', error);
+      throw error;
+    }
+  };
 
   useEffect(() => {
     // Check current session
@@ -53,6 +82,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      setSession(session);
+
       if (session?.user) {
         const { data: profile } = await supabase
           .from('profiles')
@@ -142,6 +173,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         email,
         full_name: fullName,
         role,
+        created_at: new Date().toISOString(),
       });
     }
   };
@@ -170,10 +202,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       value={{
         user,
         loading,
+        session,
         signIn,
         signUp,
         signOut,
         updateProfile,
+        refreshSession,
+        getAccessToken,
       }}
     >
       {children}

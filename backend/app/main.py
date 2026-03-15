@@ -13,7 +13,7 @@ from app.config import settings
 from app.production import prod_settings, get_cors_config, is_production
 from app.logging_config import logger, setup_logging
 from app.middleware.rate_limit import RateLimitMiddleware
-from app.routers import auth, users, companies, jobs, interviews, resume, dashboard, rankings
+from app.routers import auth, users, companies, jobs, interviews, resume, dashboard, rankings, recruiter, analytics
 
 
 @asynccontextmanager
@@ -83,6 +83,8 @@ app.include_router(interviews.router, prefix="/api/v1")
 app.include_router(resume.router, prefix="/api/v1")
 app.include_router(dashboard.router, prefix="/api/v1")
 app.include_router(rankings.router, prefix="/api/v1")
+app.include_router(recruiter.router, prefix="/api/v1")
+app.include_router(analytics.router, prefix="/api/v1")
 
 
 @app.get("/")

@@ -1,12 +1,11 @@
-import { View, Text, TouchableOpacity, StyleSheet, FlatList, TextInput, ActivityIndicator } from "react-native";
+import React, { useState, useCallback } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, FlatList, TextInput, ActivityIndicator, Alert } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { MaterialIcons } from "@expo/vector-icons";
 import { COLORS, SPACING, FONT_SIZES, BORDER_RADIUS } from "../../constants/theme";
-import { Interview } from "../../types";
 import { useAuth } from "../../contexts/AuthContext";
-import { useInterviews } from "../../hooks/useInterviews";
-import { useEffect } from "react";
+import { useCandidateDashboard, JobRecommendation, resumeApi } from "../../hooks/useDashboard";
 
 const getStatusColor = (status: string) => {
   switch (status) {
@@ -35,32 +34,117 @@ const getCompanyIcon = (company: string) => {
   }
 };
 
-const mapBackendInterviewToUI = (interview: any): Interview => {
-  const job = interview.jobs || {};
-  const company = job.companies || {};
-  return {
-    id: interview.id,
-    company: company.name || "Company",
-    role: job.title || "Role",
-    status: interview.status === "ready" ? "applied" : interview.status === "in_progress" ? "interview" : interview.status === "completed" ? "closed" : "applied",
-    stage: interview.current_question_index || 1,
-    totalStages: interview.max_questions || 3,
-    deadline: interview.status === "ready" ? "2 days" : undefined,
-    scheduledDate: interview.started_at ? new Date(interview.started_at).toLocaleDateString() : undefined,
-    score: interview.interview_scores?.[0]?.overall_score,
-  };
-};
-
 export default function HomeScreen() {
   const router = useRouter();
   const { user } = useAuth();
-  const { interviews, loading, error, refetch } = useInterviews();
+  const { jobs, resume, loading, error, fetchDashboard } = useCandidateDashboard();
+  const [refreshing, setRefreshing] = useState(false);
 
-  const handleRefresh = () => {
-    refetch();
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await fetchDashboard();
+    setRefreshing(false);
   };
 
-  const renderInterviewCard = ({ item }: { item: Interview }) => {
+  const renderJobCard = ({ item }: { item: JobRecommendation }) => {
+    const job = item.job;
+    const company = item.company_name || "Company";
+    const status = "ready"; // Default status for recommended jobs
+
+    const statusStyle = getStatusColor(status);
+
+    return (
+      <TouchableOpacity
+        style={styles.card}
+        onPress={() => router.push(`/interview/details?id=${job.id}`)}
+      >
+        <View style={styles.cardHeader}>
+          <View style={styles.companyInfo}>
+            <View style={styles.companyIcon}>
+              <MaterialIcons
+                name={getCompanyIcon(company) as any}
+                size={28}
+                color="#e2e8f0"
+              />
+            </View>
+            <View>
+              <Text style={styles.companyName}>{company}</Text>
+              <Text style={styles.role}>{job.title}</Text>
+            </View>
+          </View>
+          <View style={[styles.statusBadge, { backgroundColor: statusStyle.bg }]}>
+            <View style={[styles.statusDot, { backgroundColor: statusStyle.dot }]} />
+            <Text style={[styles.statusText, { color: statusStyle.text }]}>
+              {item.match_score > 0 ? `${Math.round(item.match_score)}% Match` : "Available"}
+            </Text>
+          </View>
+        </View>
+
+        {/* Match Score Bar */}
+        {item.match_score > 0 && (
+          <View style={styles.matchContainer}>
+            <View style={styles.matchBar}>
+              <View style={[styles.matchFill, { width: `${item.match_score}%` }]} />
+            </View>
+            <Text style={styles.matchLabel}>
+              {item.matched_skills?.length || 0} skills matched
+            </Text>
+          </View>
+        )}
+
+        <View style={styles.cardFooter}>
+          <View style={styles.skillContainer}>
+            {item.matched_skills?.slice(0, 3).map((skill, index) => (
+              <View key={index} style={styles.skillBadge}>
+                <Text style={styles.skillText}>{skill}</Text>
+              </View>
+            ))}
+            {item.missing_skills?.length > 0 && (
+              <Text style={styles.missingText}>+{item.missing_skills.length} needed</Text>
+            )}
+          </View>
+          <TouchableOpacity
+            style={styles.viewButton}
+            onPress={() => router.push(`/interview/details?id=${job.id}`)}
+          >
+            <Text style={styles.viewButtonText}>View</Text>
+          </TouchableOpacity>
+        </View>
+      </TouchableOpacity>
+    );
+  };
+
+  // Mock interviews for demo
+  const mockInterviews = [
+    {
+      id: "1",
+      company: "TechNova",
+      role: "Backend Developer",
+      status: "applied",
+      stage: 1,
+      totalStages: 3,
+      deadline: "2 days",
+    },
+    {
+      id: "2",
+      company: "AI Labs",
+      role: "ML Engineer",
+      status: "interview",
+      stage: 2,
+      totalStages: 3,
+      scheduledDate: "Oct 24",
+    },
+    {
+      id: "3",
+      company: "CloudScale",
+      role: "DevOps Architect",
+      status: "closed",
+      stage: 3,
+      totalStages: 3,
+    },
+  ];
+
+  const renderInterviewCard = ({ item }: { item: any }) => {
     const statusStyle = getStatusColor(item.status);
 
     return (
@@ -134,7 +218,6 @@ export default function HomeScreen() {
           <Text style={styles.deadline}>
             {item.deadline ? `Ends in ${item.deadline}` :
              item.scheduledDate ? `Scheduled: ${item.scheduledDate}` :
-             item.score ? `Score: ${item.score}%` :
              "Interview process completed"}
           </Text>
         </View>
@@ -142,36 +225,8 @@ export default function HomeScreen() {
     );
   };
 
-  // If no user logged in, show mock data
-  const displayInterviews = user ? interviews : [];
-  const mockInterviews: Interview[] = !user ? [
-    {
-      id: "1",
-      company: "TechNova",
-      role: "Backend Developer",
-      status: "applied",
-      stage: 1,
-      totalStages: 3,
-      deadline: "2 days",
-    },
-    {
-      id: "2",
-      company: "AI Labs",
-      role: "ML Engineer",
-      status: "interview",
-      stage: 2,
-      totalStages: 3,
-      scheduledDate: "Oct 24",
-    },
-    {
-      id: "3",
-      company: "CloudScale",
-      role: "DevOps Architect",
-      status: "closed",
-      stage: 3,
-      totalStages: 3,
-    },
-  ] : [];
+  // Show prompt to upload resume if not uploaded
+  const showResumePrompt = !resume && !loading;
 
   return (
     <SafeAreaView style={styles.container} edges={["top"]}>
@@ -195,7 +250,9 @@ export default function HomeScreen() {
           </TouchableOpacity>
         </View>
 
-        <Text style={styles.sectionTitle}>Available Interviews</Text>
+        <Text style={styles.sectionTitle}>
+          {jobs.length > 0 ? "Recommended for You" : "Available Interviews"}
+        </Text>
 
         {/* Search Bar */}
         <View style={styles.searchContainer}>
@@ -208,11 +265,23 @@ export default function HomeScreen() {
         </View>
       </View>
 
-      {/* Interview List */}
+      {/* Resume Upload Prompt */}
+      {showResumePrompt && (
+        <TouchableOpacity style={styles.uploadPrompt} onPress={() => router.push('/upload-resume')}>
+          <MaterialIcons name="upload-file" size={32} color={COLORS.primary} />
+          <View style={styles.uploadTextContainer}>
+            <Text style={styles.uploadTitle}>Upload Your Resume</Text>
+            <Text style={styles.uploadSubtitle}>Get personalized job recommendations</Text>
+          </View>
+          <MaterialIcons name="chevron-right" size={24} color={COLORS.textMuted} />
+        </TouchableOpacity>
+      )}
+
+      {/* Loading */}
       {loading ? (
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={COLORS.primary} />
-          <Text style={styles.loadingText}>Loading interviews...</Text>
+          <Text style={styles.loadingText}>Loading recommendations...</Text>
         </View>
       ) : error ? (
         <View style={styles.errorContainer}>
@@ -223,12 +292,12 @@ export default function HomeScreen() {
         </View>
       ) : (
         <FlatList
-          data={displayInterviews.length > 0 ? displayInterviews.map(mapBackendInterviewToUI) : mockInterviews}
-          keyExtractor={(item) => item.id}
-          renderItem={renderInterviewCard}
+          data={jobs.length > 0 ? jobs : mockInterviews}
+          keyExtractor={(item: any, index: number) => (item.job_id || item.id || index.toString())}
+          renderItem={({ item }: { item: any }) => jobs.length > 0 ? renderJobCard({ item }) : renderInterviewCard({ item })}
           contentContainerStyle={styles.listContent}
           showsVerticalScrollIndicator={false}
-          refreshing={loading}
+          refreshing={refreshing}
           onRefresh={handleRefresh}
         />
       )}
@@ -325,9 +394,29 @@ const styles = StyleSheet.create({
     color: COLORS.primary,
     backgroundColor: "transparent",
   },
-  listContent: {
-    paddingHorizontal: SPACING.md,
-    paddingBottom: 100,
+  uploadPrompt: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginHorizontal: SPACING.md,
+    marginBottom: SPACING.md,
+    padding: SPACING.md,
+    backgroundColor: COLORS.surface,
+    borderRadius: BORDER_RADIUS.lg,
+    borderWidth: 1,
+    borderColor: COLORS.primary,
+  },
+  uploadTextContainer: {
+    flex: 1,
+    marginLeft: SPACING.md,
+  },
+  uploadTitle: {
+    fontSize: FONT_SIZES.md,
+    fontWeight: "600",
+    color: COLORS.primary,
+  },
+  uploadSubtitle: {
+    fontSize: FONT_SIZES.sm,
+    color: COLORS.textMuted,
   },
   loadingContainer: {
     flex: 1,
@@ -360,6 +449,10 @@ const styles = StyleSheet.create({
   retryText: {
     color: COLORS.background,
     fontWeight: "600",
+  },
+  listContent: {
+    paddingHorizontal: SPACING.md,
+    paddingBottom: 100,
   },
   card: {
     backgroundColor: COLORS.surface,
@@ -419,12 +512,54 @@ const styles = StyleSheet.create({
     textTransform: "uppercase",
     letterSpacing: 0.5,
   },
+  matchContainer: {
+    paddingHorizontal: SPACING.md,
+    paddingBottom: SPACING.sm,
+  },
+  matchBar: {
+    height: 4,
+    backgroundColor: COLORS.border,
+    borderRadius: 2,
+    overflow: "hidden",
+  },
+  matchFill: {
+    height: "100%",
+    backgroundColor: COLORS.success,
+    borderRadius: 2,
+  },
+  matchLabel: {
+    fontSize: FONT_SIZES.xs,
+    color: COLORS.textMuted,
+    marginTop: 4,
+  },
   cardFooter: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     paddingHorizontal: SPACING.md,
     paddingTop: SPACING.sm,
+  },
+  skillContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    flex: 1,
+    gap: 4,
+    flexWrap: "wrap",
+  },
+  skillBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    backgroundColor: "rgba(255,255,255,0.1)",
+    borderRadius: 4,
+  },
+  skillText: {
+    fontSize: 10,
+    color: COLORS.textMuted,
+  },
+  missingText: {
+    fontSize: 10,
+    color: COLORS.textMuted,
+    fontStyle: "italic",
   },
   avatarStack: {
     flexDirection: "row",
