@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Body
 from supabase import AsyncClient
 from app.deps import get_supabase
 from app.models.user import UserCreate, UserResponse
@@ -42,12 +42,17 @@ async def signup(
 
 @router.post("/login", response_model=AuthResponse)
 async def login(
-    email: str,
-    password: str,
+    credentials: dict = Body(..., examples=[{"email": "user@example.com", "password": "password123"}]),
     supabase: AsyncClient = Depends(get_supabase)
 ):
     """Login with email and password."""
     try:
+        email = credentials.get("email")
+        password = credentials.get("password")
+
+        if not email or not password:
+            raise HTTPException(status_code=422, detail="Email and password required")
+
         response = await supabase.auth.sign_in_with_password({
             "email": email,
             "password": password
@@ -57,6 +62,8 @@ async def login(
             session=response.session.model_dump() if response.session else None,
             user=response.user.model_dump() if response.user else None
         )
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=401, detail="Invalid credentials")
 

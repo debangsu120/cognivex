@@ -5,12 +5,14 @@ from typing import Optional, Any, List, Generic, TypeVar
 T = TypeVar("T")
 
 
-# Generic response wrapper
-class APIResponse(BaseModel, Generic[T]):
+class APIResponseData(BaseModel, Generic[T]):
     success: bool = True
     data: Optional[T] = None
     message: Optional[str] = None
     error: Optional[str] = None
+
+
+APIResponse = APIResponseData
 
 
 class PaginatedResponse(BaseModel, Generic[T]):

@@ -40,7 +40,7 @@ async def create_job(
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.get("", response_model=APIResponse[List[JobResponse]])
+@router.get("")
 async def list_jobs(
     company_id: Optional[str] = Query(None),
     is_active: Optional[bool] = True,
@@ -56,22 +56,12 @@ async def list_jobs(
         if is_active is not None:
             query = query.eq("is_active", is_active)
 
-        # Calculate offset
         offset = (page - 1) * page_size
         query = query.range(offset, offset + page_size - 1)
 
         response = await query.execute()
 
-        # Get total count
-        count_query = supabase.table("jobs").select("*", count="exact")
-        if company_id:
-            count_query = count_query.eq("company_id", company_id)
-        if is_active is not None:
-            count_query = count_query.eq("is_active", is_active)
-        count_response = await count_query.execute()
-        total = count_response.count or 0
-
-        return APIResponse(data=response.data)
+        return {"data": response.data, "message": f"Found {len(response.data)} jobs"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

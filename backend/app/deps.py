@@ -1,6 +1,6 @@
 from typing import AsyncGenerator, Optional
 from fastapi import Depends, Header
-from supabase import create_client, AsyncClient
+from supabase import acreate_client, AsyncClient
 from app.config import settings
 from app.exceptions import UnauthorizedException
 
@@ -8,11 +8,11 @@ from app.exceptions import UnauthorizedException
 _supabase_async_client: Optional[AsyncClient] = None
 
 
-def get_supabase() -> AsyncClient:
+async def get_supabase() -> AsyncClient:
     """Get async Supabase client."""
     global _supabase_async_client
     if _supabase_async_client is None:
-        _supabase_async_client = create_client(
+        _supabase_async_client = await acreate_client(
             settings.supabase_url,
             settings.supabase_key
         )

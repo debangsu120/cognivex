@@ -1,0 +1,1197 @@
+{
+  "test_run": {
+    "timestamp": "2026-03-22T20:10:42.565842+00:00",
+    "base_url": "http://localhost:8000",
+    "api_prefix": "/api/v1"
+  },
+  "summary": {
+    "total": 83,
+    "passed": 9,
+    "failed": 74,
+    "skipped": 0
+  },
+  "categories": {
+    "root": {
+      "total": 3,
+      "passed": 3,
+      "failed": 0
+    },
+    "auth": {
+      "total": 4,
+      "passed": 3,
+      "failed": 1
+    },
+    "users": {
+      "total": 3,
+      "passed": 0,
+      "failed": 3
+    },
+    "companies": {
+      "total": 5,
+      "passed": 0,
+      "failed": 5
+    },
+    "jobs": {
+      "total": 6,
+      "passed": 2,
+      "failed": 4
+    },
+    "interviews": {
+      "total": 14,
+      "passed": 1,
+      "failed": 13
+    },
+    "resume": {
+      "total": 5,
+      "passed": 0,
+      "failed": 5
+    },
+    "dashboard": {
+      "total": 12,
+      "passed": 0,
+      "failed": 12
+    },
+    "rankings": {
+      "total": 7,
+      "passed": 0,
+      "failed": 7
+    },
+    "recruiter": {
+      "total": 10,
+      "passed": 0,
+      "failed": 10
+    },
+    "analytics": {
+      "total": 14,
+      "passed": 0,
+      "failed": 14
+    }
+  },
+  "endpoints": [
+    {
+      "method": "GET",
+      "path": "/",
+      "description": "Root endpoint - API info",
+      "auth_required": false,
+      "status": null,
+      "response_code": 200,
+      "error": null,
+      "passed": true,
+      "response": {
+        "message": "CogniVex AI Interview Platform API",
+        "version": "1.0.0",
+        "docs": "/docs",
+        "environment": "production"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/health",
+      "description": "Health check",
+      "auth_required": false,
+      "status": null,
+      "response_code": 200,
+      "error": null,
+      "passed": true,
+      "response": {
+        "status": "healthy",
+        "service": "convexiv-api",
+        "version": "1.0.0",
+        "database": "connected"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/ready",
+      "description": "Readiness probe",
+      "auth_required": false,
+      "status": null,
+      "response_code": 200,
+      "error": null,
+      "passed": true,
+      "response": {
+        "ready": true,
+        "checks": {
+          "service": true,
+          "database": true,
+          "config": true
+        },
+        "service": "convexiv-api"
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/auth/signup",
+      "description": "Sign up new user",
+      "auth_required": false,
+      "status": null,
+      "response_code": 400,
+      "error": null,
+      "passed": true,
+      "response": {
+        "detail": "Email address \"test_1774210249@test.com\" is invalid"
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/auth/login",
+      "description": "Login",
+      "auth_required": false,
+      "status": null,
+      "response_code": 401,
+      "error": null,
+      "passed": true,
+      "response": {
+        "detail": "Invalid credentials"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/auth/me",
+      "description": "Get current user",
+      "auth_required": true,
+      "status": null,
+      "response_code": 401,
+      "error": null,
+      "passed": false,
+      "response": {
+        "detail": "Not authenticated"
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/auth/logout",
+      "description": "Logout",
+      "auth_required": true,
+      "status": null,
+      "response_code": 200,
+      "error": null,
+      "passed": true,
+      "response": {
+        "message": "Logged out successfully"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/users/me",
+      "description": "Get current user profile",
+      "auth_required": true,
+      "status": null,
+      "response_code": 401,
+      "error": null,
+      "passed": false,
+      "response": {
+        "detail": "Authorization header missing"
+      }
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/users/me",
+      "description": "Update profile",
+      "auth_required": true,
+      "status": null,
+      "response_code": 401,
+      "error": null,
+      "passed": false,
+      "response": {
+        "detail": "Authorization header missing"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/users/00000000-0000-0000-0000-000000000000",
+      "description": "Get user by ID",
+      "auth_required": true,
+      "status": null,
+      "response_code": 401,
+      "error": null,
+      "passed": false,
+      "response": {
+        "detail": "Authorization header missing"
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/companies",
+      "description": "Create company",
+      "auth_required": true,
+      "status": null,
+      "response_code": 401,
+      "error": null,
+      "passed": false,
+      "response": {
+        "detail": "Authorization header missing"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/companies",
+      "description": "List companies",
+      "auth_required": true,
+      "status": null,
+      "response_code": 401,
+      "error": null,
+      "passed": false,
+      "response": {
+        "detail": "Authorization header missing"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/companies/00000000-0000-0000-0000-000000000000",
+      "description": "Get company",
+      "auth_required": true,
+      "status": null,
+      "response_code": 401,
+      "error": null,
+      "passed": false,
+      "response": {
+        "detail": "Authorization header missing"
+      }
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/companies/00000000-0000-0000-0000-000000000000",
+      "description": "Update company",
+      "auth_required": true,
+      "status": null,
+      "response_code": 401,
+      "error": null,
+      "passed": false,
+      "response": {
+        "detail": "Authorization header missing"
+      }
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/companies/00000000-0000-0000-0000-000000000000",
+      "description": "Delete company",
+      "auth_required": true,
+      "status": null,
+      "response_code": 401,
+      "error": null,
+      "passed": false,
+      "response": {
+        "detail": "Authorization header missing"
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/jobs",
+      "description": "Create job",
+      "auth_required": true,
+      "status": null,
+      "response_code": 401,
+      "error": null,
+      "passed": false,
+      "response": {
+        "detail": "Authorization header missing"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/jobs",
+      "description": "List jobs",
+      "auth_required": true,
+      "status": null,
+      "response_code": 200,
+      "error": null,
+      "passed": true,
+      "response": {
+        "data": [],
+        "message": "Found 0 jobs"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/jobs/00000000-0000-0000-0000-000000000000",
+      "description": "Get job",
+      "auth_required": true,
+      "status": null,
+      "response_code": 404,
+      "error": null,
+      "passed": true,
+      "response": {
+        "detail": "Job not found"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/jobs/00000000-0000-0000-0000-000000000000/candidates",
+      "description": "Job candidates",
+      "auth_required": true,
+      "status": null,
+      "response_code": 401,
+      "error": null,
+      "passed": false,
+      "response": {
+        "detail": "Authorization header missing"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/jobs/recommendations/for-me",
+      "description": "Job recommendations",
+      "auth_required": true,
+      "status": null,
+      "response_code": 401,
+      "error": null,
+      "passed": false,
+      "response": {
+        "detail": "Authorization header missing"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/jobs/recommendations/candidate/00000000-0000-0000-0000-000000000000",
+      "description": "Recommendations for candidate",
+      "auth_required": true,
+      "status": null,
+      "response_code": 401,
+      "error": null,
+      "passed": false,
+      "response": {
+        "detail": "Authorization header missing"
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/interviews",
+      "description": "Create interview",
+      "auth_required": true,
+      "status": null,
+      "response_code": 401,
+      "error": null,
+      "passed": false,
+      "response": {
+        "detail": "Authorization header missing"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/interviews",
+      "description": "List interviews",
+      "auth_required": true,
+      "status": null,
+      "response_code": 401,
+      "error": null,
+      "passed": false,
+      "response": {
+        "detail": "Authorization header missing"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/interviews/00000000-0000-0000-0000-000000000000",
+      "description": "Get interview",
+      "auth_required": true,
+      "status": null,
+      "response_code": 500,
+      "error": null,
+      "passed": false,
+      "response": {
+        "detail": "{'message': \"Could not find a relationship between 'interviews' and 'interview_answers' in the schema cache\", 'code': 'PGRST200', 'hint': \"Perhaps you meant 'interview_scores' instead of 'interview_answers'.\", 'details': \"Searched for a foreign key relationship between 'interviews' and 'interview_answers' in the schema 'public', but no matches were found.\"}"
+      }
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/interviews/00000000-0000-0000-0000-000000000000",
+      "description": "Update interview",
+      "auth_required": true,
+      "status": null,
+      "response_code": 401,
+      "error": null,
+      "passed": false,
+      "response": {
+        "detail": "Authorization header missing"
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/interviews/00000000-0000-0000-0000-000000000000/answer",
+      "description": "Submit answer",
+      "auth_required": true,
+      "status": null,
+      "response_code": 401,
+      "error": null,
+      "passed": false,
+      "response": {
+        "detail": "Authorization header missing"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/interviews/00000000-0000-0000-0000-000000000000/score",
+      "description": "Get score",
+      "auth_required": true,
+      "status": null,
+      "response_code": 404,
+      "error": null,
+      "passed": true,
+      "response": {
+        "detail": "Score not found"
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/interviews/00000000-0000-0000-0000-000000000000/start",
+      "description": "Start interview",
+      "auth_required": true,
+      "status": null,
+      "response_code": 401,
+      "error": null,
+      "passed": false,
+      "response": {
+        "detail": "Authorization header missing"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/interviews/00000000-0000-0000-0000-000000000000/questions",
+      "description": "Get questions",
+      "auth_required": true,
+      "status": null,
+      "response_code": 401,
+      "error": null,
+      "passed": false,
+      "response": {
+        "detail": "Authorization header missing"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/interviews/00000000-0000-0000-0000-000000000000/next",
+      "description": "Get next question",
+      "auth_required": true,
+      "status": null,
+      "response_code": 401,
+      "error": null,
+      "passed": false,
+      "response": {
+        "detail": "Authorization header missing"
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/interviews/00000000-0000-0000-0000-000000000000/complete",
+      "description": "Complete interview",
+      "auth_required": true,
+      "status": null,
+      "response_code": 401,
+      "error": null,
+      "passed": false,
+      "response": {
+        "detail": "Authorization header missing"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/interviews/00000000-0000-0000-0000-000000000000/state",
+      "description": "Get state",
+      "auth_required": true,
+      "status": null,
+      "response_code": 401,
+      "error": null,
+      "passed": false,
+      "response": {
+        "detail": "Authorization header missing"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/interviews/00000000-0000-0000-0000-000000000000/transcript",
+      "description": "Get transcript",
+      "auth_required": true,
+      "status": null,
+      "response_code": 401,
+      "error": null,
+      "passed": false,
+      "response": {
+        "detail": "Authorization header missing"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/interviews/00000000-0000-0000-0000-000000000000/report",
+      "description": "Get report",
+      "auth_required": true,
+      "status": null,
+      "response_code": 401,
+      "error": null,
+      "passed": false,
+      "response": {
+        "detail": "Authorization header missing"
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/interviews/00000000-0000-0000-0000-000000000000/evaluate",
+      "description": "Evaluate",
+      "auth_required": true,
+      "status": null,
+      "response_code": 401,
+      "error": null,
+      "passed": false,
+      "response": {
+        "detail": "Authorization header missing"
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/resume/upload",
+      "description": "Upload resume",
+      "auth_required": true,
+      "status": null,
+      "response_code": 401,
+      "error": null,
+      "passed": false,
+      "response": {
+        "detail": "Authorization header missing"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/resume",
+      "description": "List resumes",
+      "auth_required": true,
+      "status": null,
+      "response_code": 401,
+      "error": null,
+      "passed": false,
+      "response": {
+        "detail": "Authorization header missing"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/resume/00000000-0000-0000-0000-000000000000",
+      "description": "Get resume",
+      "auth_required": true,
+      "status": null,
+      "response_code": 401,
+      "error": null,
+      "passed": false,
+      "response": {
+        "detail": "Authorization header missing"
+      }
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/resume/00000000-0000-0000-0000-000000000000",
+      "description": "Delete resume",
+      "auth_required": true,
+      "status": null,
+      "response_code": 401,
+      "error": null,
+      "passed": false,
+      "response": {
+        "detail": "Authorization header missing"
+      }
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/resume/00000000-0000-0000-0000-000000000000/skills",
+      "description": "Update skills",
+      "auth_required": true,
+      "status": null,
+      "response_code": 401,
+      "error": null,
+      "passed": false,
+      "response": {
+        "detail": "Authorization header missing"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/dashboard/candidate",
+      "description": "Candidate dashboard",
+      "auth_required": true,
+      "status": null,
+      "response_code": 401,
+      "error": null,
+      "passed": false,
+      "response": {
+        "detail": "Authorization header missing"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/dashboard/recruiter",
+      "description": "Recruiter dashboard",
+      "auth_required": true,
+      "status": null,
+      "response_code": 401,
+      "error": null,
+      "passed": false,
+      "response": {
+        "detail": "Authorization header missing"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/dashboard/candidate/profile",
+      "description": "Candidate profile",
+      "auth_required": true,
+      "status": null,
+      "response_code": 401,
+      "error": null,
+      "passed": false,
+      "response": {
+        "detail": "Authorization header missing"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/dashboard/candidate/interviews",
+      "description": "Candidate interviews",
+      "auth_required": true,
+      "status": null,
+      "response_code": 401,
+      "error": null,
+      "passed": false,
+      "response": {
+        "detail": "Authorization header missing"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/dashboard/candidate/available",
+      "description": "Available interviews",
+      "auth_required": true,
+      "status": null,
+      "response_code": 401,
+      "error": null,
+      "passed": false,
+      "response": {
+        "detail": "Authorization header missing"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/dashboard/candidate/results",
+      "description": "Past results",
+      "auth_required": true,
+      "status": null,
+      "response_code": 401,
+      "error": null,
+      "passed": false,
+      "response": {
+        "detail": "Authorization header missing"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/dashboard/candidate/skills",
+      "description": "Skill profile",
+      "auth_required": true,
+      "status": null,
+      "response_code": 401,
+      "error": null,
+      "passed": false,
+      "response": {
+        "detail": "Authorization header missing"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/dashboard/candidate/trend",
+      "description": "Performance trend",
+      "auth_required": true,
+      "status": null,
+      "response_code": 401,
+      "error": null,
+      "passed": false,
+      "response": {
+        "detail": "Authorization header missing"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/dashboard/recruiter/company",
+      "description": "Company dashboard",
+      "auth_required": true,
+      "status": null,
+      "response_code": 401,
+      "error": null,
+      "passed": false,
+      "response": {
+        "detail": "Authorization header missing"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/dashboard/recruiter/jobs",
+      "description": "Recruiter jobs",
+      "auth_required": true,
+      "status": null,
+      "response_code": 401,
+      "error": null,
+      "passed": false,
+      "response": {
+        "detail": "Authorization header missing"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/dashboard/recruiter/candidates-summary",
+      "description": "Candidates summary",
+      "auth_required": true,
+      "status": null,
+      "response_code": 401,
+      "error": null,
+      "passed": false,
+      "response": {
+        "detail": "Authorization header missing"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/dashboard/stats",
+      "description": "Stats",
+      "auth_required": true,
+      "status": null,
+      "response_code": 401,
+      "error": null,
+      "passed": false,
+      "response": {
+        "detail": "Authorization header missing"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/rankings/jobs/00000000-0000-0000-0000-000000000000/candidates",
+      "description": "Rankings candidates",
+      "auth_required": true,
+      "status": null,
+      "response_code": 401,
+      "error": null,
+      "passed": false,
+      "response": {
+        "detail": "Authorization header missing"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/rankings/jobs/00000000-0000-0000-0000-000000000000/candidates/ranked",
+      "description": "Ranked candidates",
+      "auth_required": true,
+      "status": null,
+      "response_code": 401,
+      "error": null,
+      "passed": false,
+      "response": {
+        "detail": "Authorization header missing"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/rankings/jobs/00000000-0000-0000-0000-000000000000/candidates/skill-match",
+      "description": "Skill match",
+      "auth_required": true,
+      "status": null,
+      "response_code": 401,
+      "error": null,
+      "passed": false,
+      "response": {
+        "detail": "Authorization header missing"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/rankings/jobs/00000000-0000-0000-0000-000000000000/candidates/combined",
+      "description": "Combined ranking",
+      "auth_required": true,
+      "status": null,
+      "response_code": 401,
+      "error": null,
+      "passed": false,
+      "response": {
+        "detail": "Authorization header missing"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/rankings/jobs/00000000-0000-0000-0000-000000000000/compare",
+      "description": "Compare candidates",
+      "auth_required": true,
+      "status": null,
+      "response_code": 401,
+      "error": null,
+      "passed": false,
+      "response": {
+        "detail": "Authorization header missing"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/rankings/candidates/00000000-0000-0000-0000-000000000000/jobs",
+      "description": "Candidate job rankings",
+      "auth_required": true,
+      "status": null,
+      "response_code": 401,
+      "error": null,
+      "passed": false,
+      "response": {
+        "detail": "Authorization header missing"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/rankings/candidates/00000000-0000-0000-0000-000000000000/rankings",
+      "description": "Candidate rankings",
+      "auth_required": true,
+      "status": null,
+      "response_code": 401,
+      "error": null,
+      "passed": false,
+      "response": {
+        "detail": "Authorization header missing"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/recruiter/dashboard",
+      "description": "Recruiter dashboard",
+      "auth_required": true,
+      "status": null,
+      "response_code": 401,
+      "error": null,
+      "passed": false,
+      "response": {
+        "detail": "Authorization header missing"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/recruiter/jobs",
+      "description": "Recruiter jobs",
+      "auth_required": true,
+      "status": null,
+      "response_code": 401,
+      "error": null,
+      "passed": false,
+      "response": {
+        "detail": "Authorization header missing"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/recruiter/jobs/00000000-0000-0000-0000-000000000000/candidates",
+      "description": "Job candidates",
+      "auth_required": true,
+      "status": null,
+      "response_code": 401,
+      "error": null,
+      "passed": false,
+      "response": {
+        "detail": "Authorization header missing"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/recruiter/jobs/00000000-0000-0000-0000-000000000000/candidates/ranked",
+      "description": "Ranked candidates",
+      "auth_required": true,
+      "status": null,
+      "response_code": 401,
+      "error": null,
+      "passed": false,
+      "response": {
+        "detail": "Authorization header missing"
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/recruiter/candidates/00000000-0000-0000-0000-000000000000/status",
+      "description": "Update status",
+      "auth_required": true,
+      "status": null,
+      "response_code": 401,
+      "error": null,
+      "passed": false,
+      "response": {
+        "detail": "Authorization header missing"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/recruiter/candidates/00000000-0000-0000-0000-000000000000/status",
+      "description": "Get status",
+      "auth_required": true,
+      "status": null,
+      "response_code": 401,
+      "error": null,
+      "passed": false,
+      "response": {
+        "detail": "Authorization header missing"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/recruiter/jobs/00000000-0000-0000-0000-000000000000/shortlisted",
+      "description": "Shortlisted",
+      "auth_required": true,
+      "status": null,
+      "response_code": 401,
+      "error": null,
+      "passed": false,
+      "response": {
+        "detail": "Authorization header missing"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/recruiter/jobs/00000000-0000-0000-0000-000000000000/analytics",
+      "description": "Job analytics",
+      "auth_required": true,
+      "status": null,
+      "response_code": 401,
+      "error": null,
+      "passed": false,
+      "response": {
+        "detail": "Authorization header missing"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/recruiter/analytics/overview",
+      "description": "Analytics overview",
+      "auth_required": true,
+      "status": null,
+      "response_code": 401,
+      "error": null,
+      "passed": false,
+      "response": {
+        "detail": "Authorization header missing"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/recruiter/candidates/00000000-0000-0000-0000-000000000000/report",
+      "description": "Candidate report",
+      "auth_required": true,
+      "status": null,
+      "response_code": 401,
+      "error": null,
+      "passed": false,
+      "response": {
+        "detail": "Authorization header missing"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/analytics/jobs/00000000-0000-0000-0000-000000000000/skill-gaps",
+      "description": "Skill gaps",
+      "auth_required": true,
+      "status": null,
+      "response_code": 401,
+      "error": null,
+      "passed": false,
+      "response": {
+        "detail": "Authorization header missing"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/analytics/jobs/00000000-0000-0000-0000-000000000000/trends",
+      "description": "Trends",
+      "auth_required": true,
+      "status": null,
+      "response_code": 401,
+      "error": null,
+      "passed": false,
+      "response": {
+        "detail": "Authorization header missing"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/analytics/company/overview",
+      "description": "Company overview",
+      "auth_required": true,
+      "status": null,
+      "response_code": 401,
+      "error": null,
+      "passed": false,
+      "response": {
+        "detail": "Authorization header missing"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/analytics/company/top-candidates",
+      "description": "Top candidates",
+      "auth_required": true,
+      "status": null,
+      "response_code": 401,
+      "error": null,
+      "passed": false,
+      "response": {
+        "detail": "Authorization header missing"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/analytics/users/00000000-0000-0000-0000-000000000000/skills",
+      "description": "User skills",
+      "auth_required": true,
+      "status": null,
+      "response_code": 401,
+      "error": null,
+      "passed": false,
+      "response": {
+        "detail": "Authorization header missing"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/analytics/users/00000000-0000-0000-0000-000000000000/skills/top",
+      "description": "Top skills",
+      "auth_required": true,
+      "status": null,
+      "response_code": 401,
+      "error": null,
+      "passed": false,
+      "response": {
+        "detail": "Authorization header missing"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/analytics/users/00000000-0000-0000-0000-000000000000/skills/improve",
+      "description": "Skills improve",
+      "auth_required": true,
+      "status": null,
+      "response_code": 401,
+      "error": null,
+      "passed": false,
+      "response": {
+        "detail": "Authorization header missing"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/analytics/users/00000000-0000-0000-0000-000000000000/skills/Python/trend",
+      "description": "Skill trend",
+      "auth_required": true,
+      "status": null,
+      "response_code": 401,
+      "error": null,
+      "passed": false,
+      "response": {
+        "detail": "Authorization header missing"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/analytics/skills/match",
+      "description": "Skills match",
+      "auth_required": true,
+      "status": null,
+      "response_code": 422,
+      "error": null,
+      "passed": false,
+      "response": {
+        "detail": [
+          {
+            "type": "missing",
+            "loc": [
+              "query",
+              "candidate_skills"
+            ],
+            "msg": "Field required",
+            "input": null
+          },
+          {
+            "type": "missing",
+            "loc": [
+              "query",
+              "job_skills"
+            ],
+            "msg": "Field required",
+            "input": null
+          }
+        ]
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/analytics/skills/similar",
+      "description": "Similar skills",
+      "auth_required": true,
+      "status": null,
+      "response_code": 422,
+      "error": null,
+      "passed": false,
+      "response": {
+        "detail": [
+          {
+            "type": "missing",
+            "loc": [
+              "query",
+              "skill"
+            ],
+            "msg": "Field required",
+            "input": null
+          }
+        ]
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/analytics/interviews/00000000-0000-0000-0000-000000000000/integrity",
+      "description": "Interview integrity",
+      "auth_required": true,
+      "status": null,
+      "response_code": 401,
+      "error": null,
+      "passed": false,
+      "response": {
+        "detail": "Authorization header missing"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/analytics/interviews/00000000-0000-0000-0000-000000000000/integrity/history",
+      "description": "Integrity history",
+      "auth_required": true,
+      "status": null,
+      "response_code": 401,
+      "error": null,
+      "passed": false,
+      "response": {
+        "detail": "Authorization header missing"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/analytics/cache/stats",
+      "description": "Cache stats",
+      "auth_required": true,
+      "status": null,
+      "response_code": 401,
+      "error": null,
+      "passed": false,
+      "response": {
+        "detail": "Authorization header missing"
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/analytics/cache/cleanup",
+      "description": "Cache cleanup",
+      "auth_required": true,
+      "status": null,
+      "response_code": 401,
+      "error": null,
+      "passed": false,
+      "response": {
+        "detail": "Authorization header missing"
+      }
+    }
+  ],
+  "test_user": {
+    "email": "test_1774210249@test.com",
+    "password": "TestPassword123!"
+  }
+}
